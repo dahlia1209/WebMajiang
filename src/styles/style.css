@@ -1,0 +1,929 @@
+body.title {
+  color: #fff;
+  background: #000;
+  margin: 0;
+}
+
+#board {
+  display: none;
+  height: 680px;
+}
+
+body.board #board {
+  display: block;
+}
+
+#board > .board {
+  position: absolute;
+  width: 800px;
+  overflow: hidden;
+  user-select: none;
+  touch-action: manipulation;
+  margin: 0 auto;
+  background: #154;
+}
+
+#board > .board {
+  height: 680px;
+}
+
+#title .start {
+  margin: 8px auto;
+  font-family: Century, serif;
+  width: 120px;
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #fff;
+  background: #00f;
+  cursor: pointer;
+}
+
+#title {
+  display: none;
+  margin: 40px auto;
+  width: 640px;
+  padding: 4px;
+  border-radius: 5px;
+  background: #fff;
+  color: #000;
+  text-align: center;
+  font-family: Century, serif;
+}
+
+body.title #title {
+  display: block;
+}
+
+body.board > * {
+  width: 800px;
+  margin: 0 auto;
+}
+
+#board > .analyzer {
+  display: none;
+  box-sizing: border-box;
+  border: solid 1px #fff;
+  border-radius: 6px;
+  padding: 10px;
+  overflow: auto;
+  font-family: Verdana, sans-serif;
+  font-size: 12px;
+}
+
+body.board {
+  color: #fff;
+  background: #000;
+  margin: 0;
+}
+
+#title h1 {
+  margin: 0px;
+  height: 150px;
+}
+
+#title h1 img {
+  width: 600px;
+}
+
+#loaddata {
+  display: none;
+}
+
+#file {
+  display: none;
+}
+
+#stat {
+  display: none;
+}
+
+.hide {
+  display: none !important;
+}
+
+body.title>.version {
+  display: none;
+}
+
+@media screen and (max-height: 680px) {
+  body.board #navi, body.board > .version {
+      display: none;
+  }
+}
+
+#board > .board .score {
+  width: 280px;
+  height: 160px;
+  transform: translate(260px, 260px);
+  font-size: 14px;
+}
+
+#board > .board .score {
+  border-radius: 4px;
+  background: #111;
+  font-family: Georgia, serif;
+}
+
+#board > .board > * {
+  position: absolute;
+  transform-origin: 0% 0%;
+}
+
+#board > .board .timer {
+  transform: translate(120px, 600px);
+}
+
+
+#board > .board .timer {
+  color: #fff;
+  font-size: 16px;
+  font-family: Georgia, serif;
+  text-align: right;
+  text-shadow: 2px 2px 4px #000;
+}
+
+#board > .board .player-button {
+  transform: translate(120px, 580px);
+}
+
+#board > .board .player-button {
+  z-index: 1;
+  text-align: right;
+  white-space: nowrap;
+}
+
+#board > .board .select-mianzi {
+  transform: translate(120px, 572px);
+  height: 50px;
+}
+
+#board > .board .select-mianzi {
+  z-index: 1;
+  line-height: 1;
+  text-align: right;
+  white-space: nowrap;
+}
+
+#board > .board > .player.main {
+  transform: translate(120px, 580px);
+}
+#board > .board > .player {
+  font-size: 20px;
+  width: 160px;
+  height: 30px;
+  border-radius: 6px;
+  padding: 2px 0.5em;
+}
+
+#board > .board > .player {
+  background: #000;
+  font-family: Century, serif;
+  opacity: 0.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#board > .board .shoupai.main {
+  display: table;
+  width: 680px;
+  height: 60px;
+  transform: translate(120px, 620px);
+}
+
+#board > .board .he.main {
+  transform: translate(310px, 420px);
+}
+#board > .board .he {
+  width: 300px;
+}
+
+#board > .board .say.main {
+  transform: translate(300px, 520px);
+}
+
+#board > .board .say.main {
+  text-align: center;
+}
+#board > .board .say {
+  width: 200px;
+  height: 100px;
+  font-size: 64px;
+}
+#board > .board .say {
+  font-family: Century, serif;
+  color: #fff;
+  text-shadow: 3px 3px 6px #333, -3px 3px 6px #333, -3px -3px 6px #333, 3px -3px 6px #333;
+  transition: opacity 0.4s ease-out;
+}
+
+#board > .board > .player.xiajia {
+  transform: translate(540px, 440px);
+}
+
+#board > .board > .player {
+  font-size: 20px;
+  width: 160px;
+  height: 30px;
+  border-radius: 6px;
+  padding: 2px 0.5em;
+}
+#board > .board > .player {
+  background: #000;
+  font-family: Century, serif;
+  opacity: 0.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#board > .board .shoupai.xiajia {
+  display: table;
+  width: 560px;
+  height: 60px;
+  transform: translate(740px, 560px) rotate(270deg);
+}
+
+#board > .board .he.xiajia {
+  transform: translate(540px, 430px) rotate(270deg);
+}
+#board > .board .say.xiajia {
+  transform: translate(600px, 290px);
+}
+#board > .board .say.xiajia {
+  text-align: left;
+}
+
+#board > .board > .player.duimian {
+  transform: translate(500px, 60px);
+}
+
+#board > .board .shoupai.duimian {
+  display: table;
+  width: 680px;
+  height: 60px;
+  transform: translate(680px, 60px) rotate(180deg);
+}
+
+#board > .board .he.duimian {
+  transform: translate(490px, 260px) rotate(180deg);
+}
+
+#board > .board .say.duimian {
+  transform: translate(300px, 50px);
+}
+#board > .board .say.duimian {
+  text-align: center;
+}
+
+#board > .board > .player.shangjia {
+  transform: translate(80px, 206px);
+}
+
+#board > .board .shoupai.shangjia {
+  display: table;
+  width: 560px;
+  height: 60px;
+  transform: translate(60px, 120px) rotate(90deg);
+}
+
+#board > .board .he.shangjia {
+  transform: translate(260px, 250px) rotate(90deg);
+}
+
+#board > .board .say.shangjia {
+  transform: translate(0px, 290px);
+}
+
+#board > .board .say.shangjia {
+  text-align: right;
+}
+
+#board > .board .hule-dialog {
+  width: 800px;
+  height: 680px;
+}
+#board > .board .hule-dialog {
+  display: flex;
+  overflow: auto;
+  align-items: center;
+  transition: opacity 0.2s ease-out;
+}
+
+#board > .board > .summary {
+  width: 800px;
+  height: 680px;
+}
+#board > .board > .summary {
+  z-index: 1;
+  display: flex;
+  overflow: auto;
+  align-items: center;
+  transition: opacity 0.2s ease-out;
+}
+
+#board > .board .kaiju {
+  width: 800px;
+  height: 680px;
+}
+
+#board > .board .score .juchang {
+  height: 72px;
+  padding: 6px;
+}
+
+#board > .board .score .juchang {
+  float: left;
+}
+
+#board > .board .score .shan {
+  padding: 6px;
+}
+
+#board > .board .score .shan {
+  float: right;
+  text-align: right;
+}
+#board > .board .score .defen {
+  clear: both;
+}
+#board > .board .score .juchang .jushu {
+  font-size: 32px;
+}
+#board > .board .score .juchang .jushu {
+  font-family: "HGP行書体", /*"Weibei SC", "YuKyokasho",*/ STKaiti, serif;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+#board > .board .score .juchang .jicun {
+  padding: 0 8px;
+}
+
+#board > .board .score .juchang .jicun img.chouma {
+  width: 60px;
+  height: 8px;
+}
+
+
+#board > .board .score .defen div.main {
+  transform: translate(80px, 48px);
+}
+
+#board > .board .score .defen div.main {
+  text-align: center;
+}
+#board > .board .score .defen div {
+  width: 120px;
+  height: 24px;
+  font-size: 16px;
+}
+#board > .board .score .defen div {
+  position: absolute;
+}
+#board > .board .score .defen div.xiajia {
+  transform: translate(150px, 24px);
+}
+#board > .board .score .defen div.xiajia {
+  text-align: right;
+}
+#board > .board .score .defen div {
+  width: 120px;
+  height: 24px;
+  font-size: 16px;
+}
+#board > .board .score .defen div {
+  position: absolute;
+}
+
+#board > .board .score .defen div.duimian {
+  transform: translate(80px, 0px);
+}
+#board > .board .score .defen div.duimian {
+  text-align: center;
+}
+
+#board > .board .score .defen div.shangjia {
+  transform: translate(10px, 24px);
+}
+
+#board > .board .score .defen div.shangjia {
+  text-align: left;
+}
+
+#board > .board .shoupai.main .bingpai {
+  line-height: 1;
+  margin-top: 4px;
+  float: left;
+}
+
+#board > .board .player-button .button {
+  width: 4em;
+  height: 24px;
+  margin-left: 2px;
+  font-size: 16px;
+}
+#board > .board .player-button .button {
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  font-family: Verdana, sans-serif;
+  color: #fff;
+  background: #000;
+  border-radius: 4px;
+}
+
+#board > .board .shoupai.main .fulou {
+  line-height: 1;
+  margin-top: 18px;
+  float: right;
+}
+
+#board > .board .he div.lizhi {
+  line-height: 0;
+  width: 180px;
+  height: 12px;
+  text-align: center;
+}
+
+#board > .board .he .dapai {
+  line-height: 0;
+  height: 126px;
+}
+
+#board > .board .he div.lizhi .chouma {
+  width: 108px;
+}
+
+#board > .board .shoupai.xiajia .bingpai {
+  line-height: 1;
+  margin-top: 18px;
+  float: left;
+}
+
+#board > .board .shoupai.xiajia .fulou {
+  line-height: 1;
+  margin-top: 18px;
+  float: right;
+}
+
+#board > .board .shoupai.duimian .bingpai {
+  line-height: 1;
+  margin-top: 18px;
+  float: left;
+}
+#board > .board .shoupai.duimian .fulou {
+  line-height: 1;
+  margin-top: 18px;
+  float: right;
+}
+#board > .board .shoupai.shangjia .bingpai {
+  line-height: 1;
+  margin-top: 18px;
+  float: left;
+}
+
+#board > .board .shoupai.shangjia .fulou {
+  line-height: 1;
+  margin-top: 18px;
+  float: right;
+}
+
+#board > .board .hule-dialog > div > div .pingju {
+  font-size: 48px;
+  margin-top: 50px;
+  margin-bottom: 100px;
+}
+
+#board > .board .hule-dialog > div > div .pingju {
+  font-family: "HGP行書体", /*"Weibei SC", "YuKyokasho",*/ STKaiti, serif;
+  text-align: center;
+}
+
+#board > .board .hule-dialog > div > div .fenpei {
+  width: 380px;
+  height: 80px;
+  margin: 15px auto 0px auto;
+  font-size: 16px;
+  line-height: 16px;
+}
+
+#board > .board .hule-dialog > div > div .fenpei {
+  font-family: Georgia, serif;
+}
+#board > .board > .summary > div {
+  width: 800px;
+  min-height: 560px;
+  padding: 10px 0px;
+}
+
+#board > .board > .summary > div {
+  margin: auto 0;
+}
+#board > .board > .summary > div {
+  width: 800px;
+  min-height: 560px;
+  padding: 10px 0px;
+}
+#board > .board > .summary > div {
+  margin: auto 0;
+}
+#board > .board > .summary > div > div table {
+  width: 640px;
+  font-size: 18px;
+}
+#board > .board > .summary > div > div table {
+  margin: auto;
+  font-family: Century, serif;
+  border-collapse: collapse;
+  line-height: 1.5;
+}
+
+#board > .board > .summary > div > div table .r_player {
+  border-bottom: solid 2px;
+}
+
+#board > .board > .summary > div > div table .r_player .player {
+  width: 114px;
+}
+
+#board > .board > .summary > div > div table .r_defen {
+  border-top: solid 2px;
+}
+
+#board > .board > .summary > div > div table .r_defen .defen {
+  font-family: Georgia, serif;
+  text-align: right;
+  padding-right: 1.2em;
+}
+
+#board > .board > .summary > div > div table .r_point {
+  border-top: solid 1px;
+}
+
+#board > .board > .summary > div > div table .r_point .point {
+  font-size: 24px;
+}
+
+#board > .board > .summary > div > div table .r_point .point {
+  font-family: Georgia, serif;
+  text-align: center;
+}
+
+#board > .board .kaiju > div .title {
+  margin: 40px 20px;
+  text-align: center;
+  font-family: "HGP行書体", /*"Weibei SC", "YuKyokasho",*/ STKaiti, serif;
+  font-size: 32px;
+  line-height: 1;
+}
+
+#board > .board .kaiju > div {
+  margin-top: 120px;
+}
+
+#board > .board .kaiju > div {
+  z-index: 1;
+  margin-top: 120px;
+  position: relative;
+  width: 580px;
+  margin: auto;
+  background: #111;
+  border: solid 1px #111;
+  border-radius: 6px;
+}
+
+#board > .board .kaiju > div .player {
+  margin: 40px 20px;
+  height: 132px;
+  text-align: center;
+  font-family: Century, serif;
+  font-size: 24px;
+}
+
+#board > .board .kaiju > div .player > div.main {
+  transform: translate(140px, 96px);
+}
+
+#board > .board .kaiju > div .player > div {
+  position: absolute;
+  width: 240px;
+  height: 38px;
+  padding: 0px 10px;
+  border-radius: 4px;
+  background: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#board > .board .kaiju > div .player > div.xiajia {
+  transform: translate(280px, 48px);
+}
+
+
+#board > .board .kaiju > div .player > div.duimian {
+  transform: translate(140px, 0px);
+}
+
+#board > .board .kaiju > div .player > div.shangjia {
+  transform: translate(0px, 48px);
+}
+
+@media screen and (max-height: 680px) {
+  body.board #space {
+      display: block;
+      background: #666;
+      height: 100px;
+  }
+}
+
+#space {
+  display: none;
+}
+
+
+.fadeout {
+  opacity: 0 !important;
+}
+
+#board > .board .shoupai.main .bingpai .pai[role="button"] {
+  cursor: pointer;
+}
+#board > .board .shoupai.main .bingpai .pai {
+  display: inline-block;
+  height: 56px;
+  width: 40px;
+}
+
+#board > .board .shoupai.xiajia .bingpai .pai {
+  display: inline-block;
+  height: 42px;
+  width: 30px;
+}
+
+#board > .board .shoupai.duimian .bingpai .pai {
+  display: inline-block;
+  height: 42px;
+  width: 30px;
+}
+
+#board > .board .shoupai.shangjia .bingpai .pai {
+  display: inline-block;
+  height: 42px;
+  width: 30px;
+}
+
+#board > .board .score .shan .pai {
+  display: inline-block;
+  height: 42px;
+  width: 30px;
+}
+
+#board > .board .he .dapai .pai {
+  display: inline-block;
+  height: 42px;
+  width: 30px;
+}
+
+#board > .board .hule-dialog > div {
+  width: 800px;
+  min-height: 460px;
+  padding: 10px 0px;
+}
+
+#board > .board .hule-dialog > div {
+  margin: auto 0;
+}
+
+#board > .board .hule-dialog > div > div {
+  min-width: 460px;
+  padding: 20px;
+}
+#board > .board .hule-dialog > div > div {
+  display: table;
+  background: rgba(0, 0, 0, 0.8);
+  margin: auto;
+}
+
+[role="button"] * {
+  pointer-events: none;
+}
+
+#board > .board .hule-dialog > div > div .hule .shan.baopai {
+  margin-left: 40px;
+}
+#board > .board .hule-dialog > div > div .hule .shan.baopai {
+  float: left;
+}
+#board > .board .hule-dialog > div > div .hule .shan {
+  font-family: "HGP行書体", /*"Weibei SC", "YuKyokasho",*/ STKaiti, serif;
+}
+
+#board > .board .hule-dialog > div > div .hule .shan.fubaopai {
+  margin-right: 40px;
+}
+
+#board > .board .hule-dialog > div > div .hule .shan.fubaopai {
+  float: right;
+}
+
+#board > .board .hule-dialog > div > div .hule .shoupai {
+  display: table;
+  width: auto;
+  height: 70px;
+}
+
+#board > .board .hule-dialog > div > div .hule .shoupai {
+  clear: both;
+}
+
+#board > .board .hule-dialog > div > div .hule .hupai {
+  margin: 10px auto;
+  min-width: 280px;
+  font-size: 24px;
+}
+
+#board > .board .hule-dialog > div > div .hule .hupai {
+  font-family: "HGP行書体", /*"Weibei SC", "YuKyokasho",*/ STKaiti, serif;
+  line-height: 1;
+}
+#board > .board .hule-dialog > div > div .hule .jicun {
+  font-size: 16px;
+}
+
+#board > .board .hule-dialog > div > div .hule .jicun {
+  text-align: center;
+  font-family: Georgia, serif;
+}
+
+#board > .board .hule-dialog > div > div .hule .shoupai .bingpai {
+  line-height: 1;
+  margin-top: 21px;
+  float: left;
+}
+
+#board > .board .hule-dialog > div > div .hule .shoupai .fulou {
+  line-height: 1;
+  margin-top: 21px;
+  float: right;
+}
+
+#board > .board .hule-dialog > div > div .hule .shoupai .bingpai .pai {
+  display: inline-block;
+  height: 49px;
+  width: 35px;
+}
+
+#board > .board .hule-dialog > div > div .hule .shan .pai {
+  display: inline-block;
+  height: 35px;
+  width: 25px;
+}
+
+#board > .board .hule-dialog > div > div .fenpei > *.main {
+  transform: translate(146px, 48px);
+}
+#board > .board .hule-dialog > div > div .fenpei > * {
+  width: 88px;
+}
+#board > .board .hule-dialog > div > div .fenpei > * {
+  position: absolute;
+  transform-origin: 0% 0%;
+  display: inline-block;
+}
+
+#board > .board .hule-dialog > div > div .fenpei > *.xiajia {
+  transform: translate(292px, 24px);
+}
+
+#board > .board .hule-dialog > div > div .fenpei > *.duimian {
+  transform: translate(146px, 0px);
+}
+
+#board > .board .hule-dialog > div > div .fenpei > *.shangjia {
+  transform: translate(0px, 24px);
+}
+
+#board > .board .hule-dialog > div > div .hule .jicun .chouma {
+  padding-left: 8px;
+  width: 60px;
+  height: 8px;
+}
+
+#board > .board .hule-dialog > div > div .fenpei > * .player {
+  display: none;
+}
+
+#board > .board .hule-dialog > div > div .fenpei > * .defen {
+  width: 60px;
+}
+
+#board > .board .hule-dialog > div > div .fenpei > * .defen {
+  display: inline-block;
+  text-align: right;
+}
+
+#board > .board .hule-dialog > div > div .fenpei > * .diff {
+  width: 88px;
+}
+
+#board > .board .hule-dialog > div > div .fenpei > * .plus {
+  color: #0ff;
+}
+#board > .board .hule-dialog > div > div .fenpei > * .diff {
+  display: inline-block;
+  text-align: right;
+}
+#board > .board .shoupai.duimian .fulou .mianzi {
+  margin-left: 3px;
+  display: inline-block;
+}
+#board > .board .shoupai.duimian .fulou .mianzi .rotate {
+  display: inline-block;
+  white-space: nowrap;
+  text-align: left;
+  width: 42px;
+  transform-origin: 0% 0%;
+  transform: rotate(270deg) translate(-42px, 0px);
+}
+#board > .board .shoupai.duimian .fulou .mianzi .pai {
+  display: inline-block;
+  height: 42px;
+  width: 30px;
+}
+
+#board > .board .shoupai.main .fulou .mianzi .pai {
+  display: inline-block;
+  height: 42px;
+  width: 30px;
+}
+
+#board > .board .shoupai.xiajia .fulou .mianzi .pai {
+  display: inline-block;
+  height: 42px;
+  width: 30px;
+}
+
+#board > .board .shoupai.shangjia .fulou .mianzi .pai {
+  display: inline-block;
+  height: 42px;
+  width: 30px;
+}
+
+#title .start:hover,
+#title .start:focus {
+background: #ccc;
+outline: none;
+}
+
+
+#board > .board .shoupai.main .bingpai .pai:focus {
+  transform: translate(0, -8px);
+  outline: none;
+}
+
+#board > .board .shoupai.main .bingpai .zimo {
+  margin-left: 4px;
+}
+
+#board > .board .he .dapai .pai.deleted {
+transition: width 0.3s ease-out 0.1s;
+opacity: 0;
+width: 0px;
+}
+
+#board > .board .shoupai.main .bingpai .pai.deleted {
+transition: width 0.3s ease-out 0.1s;
+opacity: 0;
+width: 0px;
+}
+
+#board > .board .shoupai.xiajia .bingpai .pai.deleted {
+transition: width 0.3s ease-out 0.1s;
+opacity: 0;
+width: 0px;
+}
+
+#board > .board .shoupai.duimian .bingpai .pai.deleted {
+transition: width 0.3s ease-out 0.1s;
+opacity: 0;
+width: 0px;
+}
+#board > .board .shoupai.shangjia .bingpai .pai.deleted {
+transition: width 0.3s ease-out 0.1s;
+opacity: 0;
+width: 0px;
+}
+
+#board > .board .select-mianzi .mianzi {
+background: #000;
+border-radius: 4px;
+cursor: pointer;
+opacity: 0.8;
+}
+#board > .board .select-mianzi .mianzi:focus {
+outline: none;
+opacity: 1;
+}
