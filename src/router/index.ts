@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HelloWorld from "@/components/HelloWorld.vue"
 import Index from "@/views/page/Index.vue"
+import Netplay from "@/views/page/Netplay.vue"
 
 const routes = [
     {
@@ -10,6 +11,10 @@ const routes = [
     {
         path: '/',
         component: Index,
+    },
+    {
+        path: '/netplay',
+        component: Netplay,
     },
 ]
 

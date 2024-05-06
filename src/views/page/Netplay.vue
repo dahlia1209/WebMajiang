@@ -15,16 +15,16 @@
         <div class="loading">Loading data...</div>
         <div class="start hide" tabindex="0" role="button">START</div>
         <div class="login hide">
-            <form class="local" method="POST" action="server/auth/">
+            <form class="local" method="POST" :action="`${base}server/auth/`">
                 <input name="name" placeholder="プレーヤー名">
                 <input name="passwd" type="hidden" value="*">
                 <input type="submit" value="登録">
             </form>
-            <form class="hatena" method="POST" action="server/auth/hatena">
+            <form class="hatena" method="POST" :action="`${base}server/auth/hatena`">
                 <img src="https://www.hatena.ne.jp/p/images/favicon.ico">
                 <input type="submit" value="Hatenaで登録">
             </form>
-            <form class="google" method="POST" action="server/auth/google">
+            <form class="google" method="POST" :action="`${base}server/auth/google`">
                 <img src="https://www.google.com/favicon.ico">
                 <input type="submit" value="Googleで登録">
             </form>
@@ -222,6 +222,28 @@
             </div>
         </div>
     </div>
+    <div id="room">
+        <h1>
+            <img src="@/assets/logo.png" alt="電脳麻将">ネット対戦
+        </h1>
+        <div class="version">ver. {{ Majiang.VERSION }}</div>
+        <form>
+            ルーム
+            <input name="room_no" value disabled>
+            <ul class="room">
+                <li class="user">
+                    <img src="@/assets/icon.png">
+                    <span class="name"></span>
+                    <input class="hide" type="button" name="quit" value="退室">
+                </li>
+            </ul>
+            <select name="rule">
+                <option value="">電脳麻将ルール</option>
+            </select>
+            <input name="timer" placeholder="持ち時間">
+            <input type="submit" value="対局開始">
+        </form>
+    </div>
     <div id="board">
         <div class="board">
             <div class="score">
@@ -415,61 +437,32 @@
         </div>
     </div>
     <div class="version">ver. {{ Majiang.VERSION }}</div>
-    <div>
-        <template v-if="loginStatus === 'logout'" v-for="social in socials">
-            <button :class="$style['social-btn']" @click="handleLogin()"><span :class="$style['social-logo-wrapper']">
-                    <img :class="$style['social-logo']" :src="social.socialLogoSrc" :alt="social.socialLogoAlt">
-                </span>
-                <span :class="$style['social-text']">{{ social.socialText }}</span>
-            </button>
-        </template>
-        <button v-else-if="loginStatus === 'login'" style="cursor: pointer;" @click="handleLogout()">Log out</button>
-        <button v-else-if="loginStatus === 'pending'">Loading data...</button>
-    </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import * as Majiang from "@/components/majiang/majiang"
 import $ from 'jquery';
-import { authState, login, logout, check } from "@/state/authState"
-import googleLogo from '@/assets/google-logo-NePEveMl.svg'
-import microsoftLogo from '@/assets/microsoft-logo-BUXxQnXH.svg'
+import preset from '@/components/majiang/conf/rule.json';
+import io from 'socket.io-client';
 
 const { hide, show, fadeIn, scale,
     setSelector, clearSelector } = Majiang.UI.Util;
 const lunbans = ['main', 'xiajia', 'duimian', 'shangjia']
 const isLoading = ref(true)
-const loadedRef = ref<any>()
-const pageRef = ref<"paipu" | "netplay" | "index" | 'autoplay'>("index")
+const loadedRef = ref(false)
+const pageRef = ref<"paipu" | "netplay" | "index" | 'autoplay'>("netplay")
 const loaderrElemRef = ref<HTMLDivElement | null>(null)
-const loginStatus = ref<"pending" | "login" | "logout">("pending")
-const socials = [
-    { socialLogoSrc: googleLogo, socialLogoAlt: "Google logo", socialText: "Googleで続ける" },
-    { socialLogoSrc: microsoftLogo, socialLogoAlt: "Microsoft logo", socialText: "Microsoft アカウントで続ける" },
-]
+const base = ref(import.meta.env.VITE_SOCKET_SERVER_BASE)
+
 
 onMounted(() => {
     isLoading.value = false
     init()
     loaderr()
-    loginStatus.value = "pending"
-    check().then((resolve) => {
-        if (resolve) {
-            loginStatus.value = "login"
-        } else {
-            loginStatus.value = "logout"
-        }
-    })
-
+    loadedRef.value=true
 })
 
-async function handleLogin() {
-    await login()
-}
-async function handleLogout() {
-    await logout()
-}
 
 
 function loaderr() {
@@ -477,72 +470,193 @@ function loaderr() {
 }
 
 function init() {
-    let game;
-    const pai = Majiang.UI.pai($('#loaddata'));
+    const pai   = Majiang.UI.pai($('#loaddata'));
     const audio = Majiang.UI.audio($('#loaddata'));
-    const analyzer = (kaiju: any) => {
+
+    const analyzer = (kaiju:any)=>{
         $('body').addClass('analyzer');
         return new Majiang.UI.Analyzer($('#board > .analyzer'), kaiju, pai,
-            () => $('body').removeClass('analyzer'));
+                                        ()=>$('body').removeClass('analyzer'));
     };
-    const viewer = (paipu: any) => {
+    const viewer = (paipu:any)=>{
         $('#board .controller').addClass('paipu')
-        $('body').attr('class', 'board');
+        $('body').attr('class','board');
         scale($('#board'), $('#space'));
         return new Majiang.UI.Paipu(
-            $('#board'), paipu, pai, audio, 'Majiang.pref',
-            () => fadeIn($('body').attr('class', 'file')),
-            analyzer);
+                        $('#board'), paipu, pai, audio, 'Majiang.pref',
+                        ()=>fadeIn($('body').attr('class','file')),
+                        analyzer);
     };
-    const stat = (paipu_list: any) => {
-        fadeIn($('body').attr('class', 'stat'));
+    const stat = (paipu_list:any)=>{
+        fadeIn($('body').attr('class','stat'));
         return new Majiang.UI.PaipuStat($('#stat'), paipu_list,
-            () => fadeIn($('body').attr('class', 'file')));
+                        ()=>fadeIn($('body').attr('class','file')));
     };
-    const file = new Majiang.UI.PaipuFile($('#file'), 'Majiang.game',
-        viewer, stat, null, null, null);
-    const rule = Majiang.rule(
-        JSON.parse(localStorage.getItem('Majiang.rule') || '{}'));
-    function start() {
-        let players = [new Majiang.UI.Player($('#board'), pai, audio)];
-        for (let i = 1; i < 4; i++) {
-            players[i] = new Majiang.AI();
-        }
-        game = new Majiang.Game(players, end, rule);
-        game.view = new Majiang.UI.Board($('#board .board'),
-            pai, audio, game.model);
+    const file = new Majiang.UI.PaipuFile($('#file'), 'Majiang.netplay',
+                                            viewer, stat,null,null,null);
+    let sock:any, myuid:any;
 
-        $('#board .controller').removeClass('paipu')
-        $('body').attr('class', 'board');
-        scale($('#board'), $('#space'));
+    function socketInit() {
+        console.log("socketInit")
+        sock = io('/', { path: `${import.meta.env.VITE_SOCKET_SERVER_BASE}/server/socket.io/`});
 
-        new Majiang.UI.GameCtl($('#board'), 'Majiang.pref', game, game._view);
-        game.kaiju();
+        sock.on('HELLO', hello);
+        sock.on('ROOM', room);
+        sock.on('START', start);
+        sock.on('END', end);
+        sock.on('ERROR', file.error);
+        sock.on('disconnect', ()=>hide($('#file .netplay form.room')));
+
+        hide($('#title .loading'));
     }
 
-    function end(paipu: any) {
-        if (paipu) file.add(paipu, 10);
-        fadeIn($('body').attr('class', 'file'));
+    function hello(user:any) {
+        if (! user) {
+            $('body').attr('class','title');
+            show($('#title .login'));
+            return;
+        }
+        myuid = user.uid;
+        show($('#file .netplay form'));
+        fadeIn($('body').attr('class','file'));
+        if (user.icon)
+            $('#file .netplay img').attr('src', user.icon)
+                                   .attr('title', user.uid);
+        $('#file .netplay .name').text(user.name);
         file.redraw();
     }
 
-    $('#file .start').on('click', start);
+    let row:any, src:any;
 
-    $(window).on('resize', () => scale($('#board'), $('#space')));
+    function room(msg:any) {
+        if (! row) {
+            row = $('#room .user').eq(0);
+            src = $('img', row).attr('src');
+        }
+        $('body').attr('class','room');
+        $('#room input[name="room_no"]').val(msg.room_no);
+        $('#room .room').empty();
+        for (let user of msg.user) {
+            let r = row.clone();
+            if (user.icon) $('img', r).attr('src', user.icon)
+                                      .attr('title', user.uid);
+            else           $('img', r).attr('src', src);
+            $('.name', r).text(user.name);
+            if (msg.user[0].uid == myuid || user.uid == myuid )
+                show($('input[name="quit"]', r).on('click', ()=> {
+                        sock.emit('ROOM', msg.room_no, user.uid);
+                        return false;
+                    }));
+            if (user.offline) r.addClass('offline');
+            else              r.removeClass('offline');
+            $('#room .room').append(r);
+        }
+        if (msg.user[0].uid == myuid) {
+            show($('#room select[name="rule"]'));
+            show($('#room input[name="timer"]'));
+            show($('#room input[type="submit"]'));
+        }
+        else {
+            hide($('#room select[name="rule"]'));
+            hide($('#room input[name="timer"]'));
+            hide($('#room input[type="submit"]'));
+        }
+    }
 
-    $(window).on('load', function () {
-        hide($('#title .loading'));
-        $('#title .start')
-            .attr('tabindex', 0).attr('role', 'button')
-            .on('click', () => {
-                clearSelector('title');
-                if (file.isEmpty) start();
-                else end(null);
-            });
-        show(setSelector($('#title .start'), 'title',
-            { focus: null, touch: false }));
+    function start() {
+
+        const player = new Majiang.UI.Player($('#board'), pai, audio);
+        player.view  = new Majiang.UI.Board($('#board .board'), pai, audio,
+                                                player.model);
+
+        const gameCtl = new Majiang.UI.GameCtl($('#board'), 'Majiang.pref',
+                                                null, player, player._view);
+        gameCtl._view.no_player_name = false;
+
+        let players:any = [];
+
+        $('#board .controller').removeClass('paipu')
+        $('body').attr('class','board');
+        scale($('#board'), $('#space'));
+        sock.off('ROOM');
+        sock.on('GAME', (msg:any)=>{
+            if (msg.players) {
+                players = msg.players;
+            }
+            else if (msg.say) {
+                player._view.say(msg.say.name, msg.say.l);
+            }
+            else if (msg.seq) {
+                player.action(msg, (reply:any = {})=>{
+                    reply.seq = msg.seq;
+                    sock.emit('GAME', reply);
+                });
+            }
+            else {
+                player.action(msg,null);
+                if (msg.kaiju && msg.kaiju.log) {
+                    let log = msg.kaiju.log.pop();
+                    for (let data of log) {
+                        player.action(data,null);
+                    }
+                }
+            }
+            player._view.players(players);
+        });
+    }
+
+    function end(paipu:any) {
+        sock.removeAllListeners('GAME');
+        sock.on('ROOM', room);
+        if (paipu) file.add(paipu, 10);
+        fadeIn($('body').attr('class','file'));
+        file.redraw();
+        $('#file input[name="room_no"]').val('');
+    }
+
+    for (let key of Object.keys(preset)) {
+        $('select[name="rule"]').append($('<option>').val(key).text(key));
+    }
+    if (localStorage.getItem('Majiang.rule')) {
+        $('select[name="rule"]').append($('<option>')
+                                .val('-').text('カスタムルール'));
+    }
+
+    $('#file form.room').on('submit', (ev)=>{
+        let room = $('input[name="room_no"]', $(ev.target)).val();
+        sock.emit('ROOM', room);
+        return false;
     });
+    $('#room form').on('submit', (ev)=>{
+        let room = $('input[name="room_no"]', $(ev.target)).val();
+
+        let rule:any = $('select[name="rule"]', $(ev.target)).val();
+        rule = ! rule      ? {}
+             : rule == '-' ? JSON.parse(
+                                localStorage.getItem('Majiang.rule')||'{}')
+             :               preset[(rule as 'Mリーグルール'|'Classicルール')];
+        rule = Majiang.rule(rule);
+
+        let timer:any = $('input[name="timer"]', $(ev.target)).val();
+        timer = timer.match(/(\d+)/g);
+        if (timer) timer = timer.map((t:any)=>+t);
+
+        sock.emit('START', room, rule, timer);
+        return false;
+    });
+
+    $(window).on('resize', ()=>scale($('#board'), $('#space')));
+
+    $(window).on('load', ()=>setTimeout(socketInit, 500));
     if (loadedRef.value) $(window).trigger('load');
+
+    $('#title .login form').each(function(){
+        let method = $(this).attr('method')
+        let url:any    = $(this).attr('action');
+        fetch(url, { method: method, redirect: 'manual' }).then(res =>{
+            if (res.status == 404) hide($(this));
+        });
+    });
 }
 
 </script>
