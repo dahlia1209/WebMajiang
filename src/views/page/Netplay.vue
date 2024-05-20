@@ -15,20 +15,24 @@
         <div class="loading">Loading data...</div>
         <div class="start hide" tabindex="0" role="button">START</div>
         <div class="login hide">
-            <form class="local" method="POST" :action="`${base}server/auth/`">
+            <form class="local" method="POST" :action="`${baseRef}/auth/`">
                 <input name="name" placeholder="プレーヤー名">
                 <input name="passwd" type="hidden" value="*">
                 <input type="submit" value="登録">
             </form>
-            <form class="hatena" method="POST" :action="`${base}server/auth/hatena`">
+            <form class="hatena" method="POST" :action="`${baseRef}/auth/hatena`">
                 <img src="https://www.hatena.ne.jp/p/images/favicon.ico">
                 <input type="submit" value="Hatenaで登録">
             </form>
-            <form class="google" method="POST" :action="`${base}server/auth/google`">
+            <form class="google" method="POST" :action="`${baseRef}/auth/google`">
                 <img src="https://www.google.com/favicon.ico">
                 <input type="submit" value="Googleで登録">
             </form>
         </div>
+        <button style="cursor: pointer;" @click="signIn">Sign in</button>
+        <button style="cursor: pointer;" @click="signOut">signOut</button>
+        <button style="cursor: pointer;" @click="wsConnect">connect</button>
+        <button style="cursor: pointer;" @click="wsClose">close</button>
 
     </div>
     <div id="loaddata">
@@ -105,7 +109,7 @@
                         <input name="room_no" placeholder="ルーム">
                         <input type="submit" value="入室">
                     </form>
-                    <form class="room">
+                    <form class="ルーム作成">
                         <input type="submit" value="ルーム作成">
                     </form>
                     <form class="logout" method="POST" action="server/logout">
@@ -440,11 +444,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import * as Majiang from "@/components/majiang/majiang"
 import $ from 'jquery';
 import preset from '@/components/majiang/conf/rule.json';
 import io from 'socket.io-client';
+import { signIn, passTokenToApi, signOut, editProfile, getToken } from '@/utils/authPopup';
+import { wsState, type IWsMessage, WsMessage,type EventName } from "@/state/wsState"
 
 const { hide, show, fadeIn, scale,
     setSelector, clearSelector } = Majiang.UI.Util;
@@ -453,105 +459,103 @@ const isLoading = ref(true)
 const loadedRef = ref(false)
 const pageRef = ref<"paipu" | "netplay" | "index" | 'autoplay'>("netplay")
 const loaderrElemRef = ref<HTMLDivElement | null>(null)
-const base = ref(import.meta.env.VITE_SOCKET_SERVER_BASE)
-
+const baseRef = ref(import.meta.env.VITE_SOCKET_SERVER_BASE)
+const myuidRef = ref("")
+const fileRef = ref<Majiang.UI.PaipuFile | undefined>(undefined)
+const rowRef=ref<any>(null)
+const srcRef=ref<any>(null)
 
 onMounted(() => {
     isLoading.value = false
     init()
     loaderr()
-    loadedRef.value=true
+    loadedRef.value = true
+})
+
+onUnmounted(() => {
+    wsClose()
 })
 
 
+const wsConnect = async () => {
+    const token = await getToken()
+    const url = "ws://127.0.0.1:8000/ws?token=" + token;
+    wsState.ws = new WebSocket(url);
+    wsState.ws.onmessage = e => {
+        const message = WsMessage.parseWsMessage(e.data)
+        console.log(message)
+        if (!message) return
+        if (message.event_name == 'HELLO') {
+            hello(message.content)
+        } else if (message.event_name == 'ROOM') {
+            room(message.content)
+        }
+    };
+}
+
+const wsMessage = async (eventName:EventName,content:any) => {
+    if (wsState.ws) {
+        const message: IWsMessage = {
+            event_name: eventName,
+            content: content
+        }
+        wsState.ws.send(JSON.stringify(message));
+    }
+}
+
+const wsClose = () => {
+    console.log("close")
+    if (wsState.ws) {
+        wsState.ws.close()
+    }
+}
 
 function loaderr() {
     if (typeof Majiang === 'undefined' && loaderrElemRef.value) loaderrElemRef.value.removeAttribute('style');
 }
 
-function init() {
-    const pai   = Majiang.UI.pai($('#loaddata'));
-    const audio = Majiang.UI.audio($('#loaddata'));
-
-    const analyzer = (kaiju:any)=>{
-        $('body').addClass('analyzer');
-        return new Majiang.UI.Analyzer($('#board > .analyzer'), kaiju, pai,
-                                        ()=>$('body').removeClass('analyzer'));
-    };
-    const viewer = (paipu:any)=>{
-        $('#board .controller').addClass('paipu')
-        $('body').attr('class','board');
-        scale($('#board'), $('#space'));
-        return new Majiang.UI.Paipu(
-                        $('#board'), paipu, pai, audio, 'Majiang.pref',
-                        ()=>fadeIn($('body').attr('class','file')),
-                        analyzer);
-    };
-    const stat = (paipu_list:any)=>{
-        fadeIn($('body').attr('class','stat'));
-        return new Majiang.UI.PaipuStat($('#stat'), paipu_list,
-                        ()=>fadeIn($('body').attr('class','file')));
-    };
-    const file = new Majiang.UI.PaipuFile($('#file'), 'Majiang.netplay',
-                                            viewer, stat,null,null,null);
-    let sock:any, myuid:any;
-
-    function socketInit() {
-        console.log("socketInit")
-        sock = io('/', { path: `${import.meta.env.VITE_SOCKET_SERVER_BASE}/server/socket.io/`});
-
-        sock.on('HELLO', hello);
-        sock.on('ROOM', room);
-        sock.on('START', start);
-        sock.on('END', end);
-        sock.on('ERROR', file.error);
-        sock.on('disconnect', ()=>hide($('#file .netplay form.room')));
-
-        hide($('#title .loading'));
+function hello(user: any) {
+    if (!user) {
+        $('body').attr('class', 'title');
+        show($('#title .login'));
+        return;
     }
+    myuidRef.value = user.uid;
+    show($('#file .netplay form'));
+    fadeIn($('body').attr('class', 'file'));
+    if (user.icon)
+        $('#file .netplay img').attr('src', user.icon)
+            .attr('title', user.uid);
+    $('#file .netplay .name').text(user.name);
+    if (!fileRef.value) { console.error("fileRef.value is undefined"); return; }
+    fileRef.value.redraw();
+}
 
-    function hello(user:any) {
-        if (! user) {
-            $('body').attr('class','title');
-            show($('#title .login'));
-            return;
+function room(msg: any) {
+        if (!rowRef.value) {
+            rowRef.value = $('#room .user').eq(0);
+            srcRef.value = $('img', rowRef.value).attr('src');
         }
-        myuid = user.uid;
-        show($('#file .netplay form'));
-        fadeIn($('body').attr('class','file'));
-        if (user.icon)
-            $('#file .netplay img').attr('src', user.icon)
-                                   .attr('title', user.uid);
-        $('#file .netplay .name').text(user.name);
-        file.redraw();
-    }
-
-    let row:any, src:any;
-
-    function room(msg:any) {
-        if (! row) {
-            row = $('#room .user').eq(0);
-            src = $('img', row).attr('src');
-        }
-        $('body').attr('class','room');
+        $('body').attr('class', 'room');
         $('#room input[name="room_no"]').val(msg.room_no);
         $('#room .room').empty();
         for (let user of msg.user) {
-            let r = row.clone();
+            let r = rowRef.value.clone();
             if (user.icon) $('img', r).attr('src', user.icon)
-                                      .attr('title', user.uid);
-            else           $('img', r).attr('src', src);
+                .attr('title', user.uid);
+            else $('img', r).attr('src', srcRef.value);
             $('.name', r).text(user.name);
-            if (msg.user[0].uid == myuid || user.uid == myuid )
-                show($('input[name="quit"]', r).on('click', ()=> {
-                        sock.emit('ROOM', msg.room_no, user.uid);
-                        return false;
-                    }));
+            if (msg.user[0].uid == myuidRef.value || user.uid == myuidRef.value)
+                show($('input[name="quit"]', r).on('click', () => {
+                    // sock.emit('ROOM', msg.room_no, user.uid);
+                    wsMessage("ROOM",{room_no:msg.room_no,uid:user.uid})
+                    return false;
+                }));
             if (user.offline) r.addClass('offline');
-            else              r.removeClass('offline');
+            else r.removeClass('offline');
             $('#room .room').append(r);
         }
-        if (msg.user[0].uid == myuid) {
+        if (msg.user[0].uid == myuidRef.value) {
             show($('#room select[name="rule"]'));
             show($('#room input[name="timer"]'));
             show($('#room input[type="submit"]'));
@@ -563,23 +567,71 @@ function init() {
         }
     }
 
+function init() {
+    const pai = Majiang.UI.pai($('#loaddata'));
+    const audio = Majiang.UI.audio($('#loaddata'));
+
+    const analyzer = (kaiju: any) => {
+        $('body').addClass('analyzer');
+        return new Majiang.UI.Analyzer($('#board > .analyzer'), kaiju, pai,
+            () => $('body').removeClass('analyzer'));
+    };
+    const viewer = (paipu: any) => {
+        $('#board .controller').addClass('paipu')
+        $('body').attr('class', 'board');
+        scale($('#board'), $('#space'));
+        return new Majiang.UI.Paipu(
+            $('#board'), paipu, pai, audio, 'Majiang.pref',
+            () => fadeIn($('body').attr('class', 'file')),
+            analyzer);
+    };
+    const stat = (paipu_list: any) => {
+        fadeIn($('body').attr('class', 'stat'));
+        return new Majiang.UI.PaipuStat($('#stat'), paipu_list,
+            () => fadeIn($('body').attr('class', 'file')));
+    };
+    fileRef.value = new Majiang.UI.PaipuFile($('#file'), 'Majiang.netplay',
+        viewer, stat, null, null, null);
+    let sock: any
+    // let myuid: any;
+
+    function socketInit() {
+        sock = io('/', { path: `${import.meta.env.VITE_SOCKET_SERVER_BASE}/server/socket.io/` });
+
+        sock.on('HELLO', hello);
+        sock.on('ROOM', room);
+        sock.on('START', start);
+        sock.on('END', end);
+        if (!fileRef.value) { console.error("fileRef.value is undefined"); return; }
+        sock.on('ERROR', fileRef.value.error);
+        sock.on('disconnect', () => hide($('#file .netplay form.room')));
+
+        hide($('#title .loading'));
+    }
+
+
+
+    let row: any, src: any;
+
+    
+
     function start() {
 
         const player = new Majiang.UI.Player($('#board'), pai, audio);
-        player.view  = new Majiang.UI.Board($('#board .board'), pai, audio,
-                                                player.model);
+        player.view = new Majiang.UI.Board($('#board .board'), pai, audio,
+            player.model);
 
         const gameCtl = new Majiang.UI.GameCtl($('#board'), 'Majiang.pref',
-                                                null, player, player._view);
+            null, player, player._view);
         gameCtl._view.no_player_name = false;
 
-        let players:any = [];
+        let players: any = [];
 
         $('#board .controller').removeClass('paipu')
-        $('body').attr('class','board');
+        $('body').attr('class', 'board');
         scale($('#board'), $('#space'));
         sock.off('ROOM');
-        sock.on('GAME', (msg:any)=>{
+        sock.on('GAME', (msg: any) => {
             if (msg.players) {
                 players = msg.players;
             }
@@ -587,17 +639,17 @@ function init() {
                 player._view.say(msg.say.name, msg.say.l);
             }
             else if (msg.seq) {
-                player.action(msg, (reply:any = {})=>{
+                player.action(msg, (reply: any = {}) => {
                     reply.seq = msg.seq;
                     sock.emit('GAME', reply);
                 });
             }
             else {
-                player.action(msg,null);
+                player.action(msg, null);
                 if (msg.kaiju && msg.kaiju.log) {
                     let log = msg.kaiju.log.pop();
                     for (let data of log) {
-                        player.action(data,null);
+                        player.action(data, null);
                     }
                 }
             }
@@ -605,12 +657,13 @@ function init() {
         });
     }
 
-    function end(paipu:any) {
+    function end(paipu: any) {
         sock.removeAllListeners('GAME');
         sock.on('ROOM', room);
-        if (paipu) file.add(paipu, 10);
-        fadeIn($('body').attr('class','file'));
-        file.redraw();
+        if (!fileRef.value) { console.error("fileRef.value is undefined"); return; }
+        if (paipu) fileRef.value.add(paipu, 10);
+        fadeIn($('body').attr('class', 'file'));
+        fileRef.value.redraw();
         $('#file input[name="room_no"]').val('');
     }
 
@@ -619,45 +672,46 @@ function init() {
     }
     if (localStorage.getItem('Majiang.rule')) {
         $('select[name="rule"]').append($('<option>')
-                                .val('-').text('カスタムルール'));
+            .val('-').text('カスタムルール'));
     }
 
-    $('#file form.room').on('submit', (ev)=>{
-        let room = $('input[name="room_no"]', $(ev.target)).val();
-        sock.emit('ROOM', room);
-        return false;
+    $('#file form.room').on('submit',async (ev) => {
+        ev.preventDefault()
+        const room_no=$('input[name="room_no"]', $(ev.target)).val()
+        await wsMessage("ROOM",{room_no,uid:null})
     });
-    $('#room form').on('submit', (ev)=>{
-        let room = $('input[name="room_no"]', $(ev.target)).val();
-
-        let rule:any = $('select[name="rule"]', $(ev.target)).val();
-        rule = ! rule      ? {}
-             : rule == '-' ? JSON.parse(
-                                localStorage.getItem('Majiang.rule')||'{}')
-             :               preset[(rule as 'Mリーグルール'|'Classicルール')];
+    $('#room form').on('submit',async  (ev) => {
+        ev.preventDefault()
+        console.log("#room form:submit")
+        // let room = $('input[name="room_no"]', $(ev.target)).val();
+        const room_no=$('input[name="room_no"]', $(ev.target)).val()
+        let rule: any = $('select[name="rule"]', $(ev.target)).val();
+        rule = !rule ? {}
+            : rule == '-' ? JSON.parse(
+                localStorage.getItem('Majiang.rule') || '{}')
+                : preset[(rule as 'Mリーグルール' | 'Classicルール')];
         rule = Majiang.rule(rule);
-
-        let timer:any = $('input[name="timer"]', $(ev.target)).val();
+        let timer: any = $('input[name="timer"]', $(ev.target)).val();
         timer = timer.match(/(\d+)/g);
-        if (timer) timer = timer.map((t:any)=>+t);
-
-        sock.emit('START', room, rule, timer);
-        return false;
+        if (timer) timer = timer.map((t: any) => +t);
+        await wsMessage("START",{room_no,rule,timer})
+        // sock.emit('START', room, rule, timer);
     });
 
-    $(window).on('resize', ()=>scale($('#board'), $('#space')));
+    $(window).on('resize', () => scale($('#board'), $('#space')));
 
-    $(window).on('load', ()=>setTimeout(socketInit, 500));
+    $(window).on('load', () => setTimeout(socketInit, 500));
     if (loadedRef.value) $(window).trigger('load');
 
-    $('#title .login form').each(function(){
+    $('#title .login form').each(function () {
         let method = $(this).attr('method')
-        let url:any    = $(this).attr('action');
-        fetch(url, { method: method, redirect: 'manual' }).then(res =>{
+        let url: any = $(this).attr('action');
+        fetch(url, { method: method, redirect: 'manual' }).then(res => {
             if (res.status == 404) hide($(this));
         });
     });
 }
+
 
 </script>
 <style>

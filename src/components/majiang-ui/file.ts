@@ -4,6 +4,8 @@
 "use strict";
 
 import $ from 'jquery';
+import 'jquery-ui';
+
 
 import  {fadeIn,hide,show,fadeOut} from "./fadein"
 

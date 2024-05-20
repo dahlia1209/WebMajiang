@@ -61,6 +61,7 @@ $(function(){
     }
 
     function hello(user:any) {
+        console.log("hello")
         if (! user) {
             $('body').attr('class','title');
             show($('#title .login'));

@@ -6,8 +6,11 @@
       "composite": true,
       "baseUrl": ".",
       "paths": {
-        "@/*": ["./src/*"]
+        "@/*": ["./src/*"],
+        "jquery-ui": [
+          "node_modules/@types/jqueryui/index"
+        ]
       },
-      "types": ["node","jquery", "jqueryui"]
+      "types": ["node"],
     }
   }

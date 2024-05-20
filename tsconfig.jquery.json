@@ -1,0 +1,11 @@
+// {
+//     "compilerOptions": {
+//       "module": "es6",
+//       "target": "es6",
+//       "lib": ["es6", "dom"],
+//       "types": ["jquery", "jqueryui"],
+//       "typeRoots": ["node_modules/@types"],
+//       "allowSyntheticDefaultImports": true
+//     }
+//   }
+  
